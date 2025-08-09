@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "eFLDNC5pqfU=",
+  "success": true,
+  "projectFilePath": "/Users/bluehawana/Projects/travelanywhere/backend/backend.csproj",
+  "expectedPackageFiles": [
+    "/Users/bluehawana/.nuget/packages/microsoft.aspnetcore.openapi/9.0.8/microsoft.aspnetcore.openapi.9.0.8.nupkg.sha512",
+    "/Users/bluehawana/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
