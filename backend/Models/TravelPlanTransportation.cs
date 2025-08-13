@@ -40,8 +40,7 @@ public class TravelPlanTransportation
     [Column("arrival_time")]
     public TimeOnly? ArrivalTime { get; set; }
 
-    [Column("cost")]
-    [Column(TypeName = "decimal(10,2)")]
+    [Column("cost", TypeName = "decimal(10,2)")]
     public decimal? Cost { get; set; }
 
     [MaxLength(100)]

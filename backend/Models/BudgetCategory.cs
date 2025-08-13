@@ -15,12 +15,10 @@ public class BudgetCategory
     [Column("name")]
     public string Name { get; set; } = string.Empty;
 
-    [Column("min_daily_budget")]
-    [Column(TypeName = "decimal(10,2)")]
+    [Column("min_daily_budget", TypeName = "decimal(10,2)")]
     public decimal? MinDailyBudget { get; set; }
 
-    [Column("max_daily_budget")]
-    [Column(TypeName = "decimal(10,2)")]
+    [Column("max_daily_budget", TypeName = "decimal(10,2)")]
     public decimal? MaxDailyBudget { get; set; }
 
     public virtual ICollection<TravelPreference> TravelPreferences { get; set; } = new List<TravelPreference>();

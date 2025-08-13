@@ -34,8 +34,7 @@ public class TravelPlan
     [Column("title")]
     public string Title { get; set; } = string.Empty;
 
-    [Column("total_budget")]
-    [Column(TypeName = "decimal(12,2)")]
+    [Column("total_budget", TypeName = "decimal(12,2)")]
     public decimal? TotalBudget { get; set; }
 
     [Column("start_date")]
@@ -48,8 +47,7 @@ public class TravelPlan
     [Column("status")]
     public string Status { get; set; } = "draft";
 
-    [Column("ai_generated_plan")]
-    [Column(TypeName = "jsonb")]
+    [Column("ai_generated_plan", TypeName = "jsonb")]
     public JsonDocument? AiGeneratedPlan { get; set; }
 
     [Column("created_at")]

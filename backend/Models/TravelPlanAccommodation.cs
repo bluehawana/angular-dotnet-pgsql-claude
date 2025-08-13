@@ -33,8 +33,7 @@ public class TravelPlanAccommodation
     [Column("check_out_date")]
     public DateOnly? CheckOutDate { get; set; }
 
-    [Column("cost_per_night")]
-    [Column(TypeName = "decimal(10,2)")]
+    [Column("cost_per_night", TypeName = "decimal(10,2)")]
     public decimal? CostPerNight { get; set; }
 
     [MaxLength(100)]

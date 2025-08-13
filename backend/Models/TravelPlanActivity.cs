@@ -30,8 +30,7 @@ public class TravelPlanActivity
     [Column("description")]
     public string? Description { get; set; }
 
-    [Column("estimated_cost")]
-    [Column(TypeName = "decimal(10,2)")]
+    [Column("estimated_cost", TypeName = "decimal(10,2)")]
     public decimal? EstimatedCost { get; set; }
 
     [MaxLength(255)]
