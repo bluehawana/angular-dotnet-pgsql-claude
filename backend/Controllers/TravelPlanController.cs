@@ -9,10 +9,12 @@ namespace backend.Controllers;
 public class TravelPlanController : ControllerBase
 {
     private readonly ITravelPlanService _travelPlanService;
+    private readonly QwenTravelPlannerService _qwenPlannerService;
 
-    public TravelPlanController(ITravelPlanService travelPlanService)
+    public TravelPlanController(ITravelPlanService travelPlanService, QwenTravelPlannerService qwenPlannerService)
     {
         _travelPlanService = travelPlanService;
+        _qwenPlannerService = qwenPlannerService;
     }
 
     [HttpPost("generate")]
@@ -22,6 +24,30 @@ public class TravelPlanController : ControllerBase
         {
             var travelPlan = await _travelPlanService.GenerateAITravelPlanAsync(request);
             return Ok(travelPlan);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("generate-detailed")]
+    public async Task<ActionResult<DetailedTravelPlan>> GenerateDetailedTravelPlan([FromBody] DetailedPlanRequest request)
+    {
+        try
+        {
+            var planRequest = new TravelPlanRequest
+            {
+                SelectedDestination = request.SelectedDestination,
+                SelectedCities = request.SelectedCities ?? Array.Empty<string>(),
+                TravelDurationDays = request.TravelDurationDays,
+                BudgetCategory = request.BudgetCategory,
+                Gender = request.Gender,
+                AgeRange = request.AgeRange
+            };
+
+            var detailedPlan = await _qwenPlannerService.GenerateDetailedPlanAsync(planRequest);
+            return Ok(detailedPlan);
         }
         catch (Exception ex)
         {

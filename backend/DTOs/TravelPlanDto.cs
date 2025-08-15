@@ -56,3 +56,13 @@ public class UpdateTravelPlanRequest
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
 }
+
+public class DetailedPlanRequest
+{
+    public string SelectedDestination { get; set; } = string.Empty;
+    public string[] SelectedCities { get; set; } = Array.Empty<string>();
+    public int TravelDurationDays { get; set; }
+    public string BudgetCategory { get; set; } = string.Empty;
+    public string Gender { get; set; } = string.Empty;
+    public string AgeRange { get; set; } = string.Empty;
+}

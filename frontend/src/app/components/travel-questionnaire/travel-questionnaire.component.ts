@@ -9,6 +9,7 @@ export interface TravelPreferences {
   preferredContinent: string;
   travelDuration: number;
   selectedDestination: string;
+  selectedCities: string[];
   accommodationType?: string;
 }
 
@@ -145,6 +146,30 @@ export interface TravelPlanResult {
                       (click)="selectDestination(destination.value)">
                 {{destination.name}}
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 7: Multi-City Selection for 7+ days -->
+        <div *ngSwitchCase="7" class="step-content" *ngIf="preferences.travelDuration >= 7">
+          <div class="form-group">
+            <label>Select top 3 cities in {{getSelectedCountryName()}} (Choose exactly 3)</label>
+            <p class="subtitle">With {{preferences.travelDuration}} days, you can explore multiple cities!</p>
+            <div class="option-buttons">
+              <button type="button" 
+                      class="option-btn city-btn" 
+                      [class.selected]="isCitySelected(city.value)"
+                      [class.disabled]="!isCitySelected(city.value) && preferences.selectedCities.length >= 3"
+                      *ngFor="let city of getCitiesForDestination()"
+                      (click)="toggleCitySelection(city.value)">
+                <div class="city-option">
+                  <span class="city-name">{{city.name}}</span>
+                  <span class="city-desc">{{city.description}}</span>
+                </div>
+              </button>
+            </div>
+            <div class="selection-counter">
+              Selected: {{preferences.selectedCities.length}}/3 cities
             </div>
           </div>
         </div>
@@ -287,6 +312,42 @@ export interface TravelPlanResult {
       min-height: 60px;
     }
 
+    .city-btn {
+      min-height: 80px;
+    }
+
+    .city-option {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .city-name {
+      font-weight: 600;
+    }
+
+    .city-desc {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .option-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .option-btn.disabled:hover {
+      border-color: #e9ecef;
+      background-color: white;
+    }
+
+    .selection-counter {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-weight: 600;
+      color: #007bff;
+    }
+
     .duration-input {
       padding: 1rem;
       border: 2px solid #e9ecef;
@@ -359,7 +420,7 @@ export class TravelQuestionnaireComponent {
   @Output() preferencesSubmitted = new EventEmitter<TravelPreferences>();
 
   currentStep = 1;
-  totalSteps = 6;
+  totalSteps = 7;
 
   preferences: TravelPreferences = {
     gender: '',
@@ -367,7 +428,8 @@ export class TravelQuestionnaireComponent {
     budgetCategory: '',
     preferredContinent: '',
     travelDuration: 0,
-    selectedDestination: ''
+    selectedDestination: '',
+    selectedCities: []
   };
 
   ageRanges = ['20-29', '30-39', '40-49', '50-59', '60+'];
@@ -454,7 +516,8 @@ export class TravelQuestionnaireComponent {
       'Where do you want to go?',
       'What\'s your budget?',
       'How long is your trip?',
-      'Pick your destination'
+      'Pick your destination',
+      'Choose your cities'
     ];
     return titles[this.currentStep];
   }
@@ -467,7 +530,8 @@ export class TravelQuestionnaireComponent {
       'Choose the continent you\'d like to explore',
       'We\'ll find the best options for your budget',
       'Tell us your trip duration in days',
-      'Select from the most popular destinations'
+      'Select from the most popular destinations',
+      'Perfect for longer trips - explore multiple destinations!'
     ];
     return subtitles[this.currentStep];
   }
@@ -491,6 +555,7 @@ export class TravelQuestionnaireComponent {
 
   selectDestination(destination: string): void {
     this.preferences.selectedDestination = destination;
+    this.preferences.selectedCities = [];
   }
 
   getContinentName(): string {
@@ -510,12 +575,18 @@ export class TravelQuestionnaireComponent {
       case 4: return this.preferences.budgetCategory !== '';
       case 5: return this.preferences.travelDuration > 0;
       case 6: return this.preferences.selectedDestination !== '';
+      case 7: return this.preferences.travelDuration < 7 || this.preferences.selectedCities.length === 3;
       default: return false;
     }
   }
 
   nextStep(): void {
     if (this.canProceedToNext() && this.currentStep < this.totalSteps) {
+      // Skip multi-city step if trip is less than 7 days
+      if (this.currentStep === 6 && this.preferences.travelDuration < 7) {
+        this.generateTravelPlan();
+        return;
+      }
       this.currentStep++;
     }
   }
@@ -529,6 +600,59 @@ export class TravelQuestionnaireComponent {
   generateTravelPlan(): void {
     if (this.canProceedToNext()) {
       this.preferencesSubmitted.emit(this.preferences);
+    }
+  }
+
+  getSelectedCountryName(): string {
+    const destinations = this.getDestinationsForContinent();
+    const destination = destinations.find(d => d.value === this.preferences.selectedDestination);
+    return destination?.name || '';
+  }
+
+  getCitiesForDestination(): {name: string, value: string, description: string}[] {
+    const citiesByDestination: {[key: string]: {name: string, value: string, description: string}[]} = {
+      'japan': [
+        {name: 'Tokyo', value: 'tokyo', description: 'Capital city, modern culture & technology'},
+        {name: 'Kyoto', value: 'kyoto', description: 'Ancient temples & traditional culture'},
+        {name: 'Osaka', value: 'osaka', description: 'Food capital & vibrant nightlife'},
+        {name: 'Hiroshima', value: 'hiroshima', description: 'Historical significance & peace memorial'},
+        {name: 'Hakone', value: 'hakone', description: 'Hot springs & Mount Fuji views'}
+      ],
+      'china': [
+        {name: 'Beijing', value: 'beijing', description: 'Capital, Forbidden City & Great Wall'},
+        {name: 'Shanghai', value: 'shanghai', description: 'Modern skyline & international hub'},
+        {name: 'Xi\'an', value: 'xian', description: 'Terracotta Warriors & ancient history'},
+        {name: 'Guilin', value: 'guilin', description: 'Stunning karst landscapes & Li River'},
+        {name: 'Chengdu', value: 'chengdu', description: 'Pandas & authentic Sichuan cuisine'}
+      ],
+      'france': [
+        {name: 'Paris', value: 'paris', description: 'City of Light, Eiffel Tower & Louvre'},
+        {name: 'Lyon', value: 'lyon', description: 'Culinary capital & historic old town'},
+        {name: 'Nice', value: 'nice', description: 'French Riviera & Mediterranean coast'},
+        {name: 'Bordeaux', value: 'bordeaux', description: 'World-class wine region'},
+        {name: 'Strasbourg', value: 'strasbourg', description: 'European Parliament & German influence'}
+      ],
+      'italy': [
+        {name: 'Rome', value: 'rome', description: 'Eternal City, Colosseum & Vatican'},
+        {name: 'Florence', value: 'florence', description: 'Renaissance art & Tuscan culture'},
+        {name: 'Venice', value: 'venice', description: 'Canals, gondolas & unique architecture'},
+        {name: 'Milan', value: 'milan', description: 'Fashion capital & modern business hub'},
+        {name: 'Naples', value: 'naples', description: 'Authentic pizza & gateway to Pompeii'}
+      ]
+    };
+    return citiesByDestination[this.preferences.selectedDestination] || [];
+  }
+
+  isCitySelected(cityValue: string): boolean {
+    return this.preferences.selectedCities.includes(cityValue);
+  }
+
+  toggleCitySelection(cityValue: string): void {
+    const index = this.preferences.selectedCities.indexOf(cityValue);
+    if (index > -1) {
+      this.preferences.selectedCities.splice(index, 1);
+    } else if (this.preferences.selectedCities.length < 3) {
+      this.preferences.selectedCities.push(cityValue);
     }
   }
 }
